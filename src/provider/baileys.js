@@ -72,11 +72,11 @@ class Baileys {
     * @example await sendAudio("xxxxxxxxxxx@c.us" || "xxxxxxxxxxxxxxxxxx@g.us", "https://domain/audio.mp3", true)
     */
 
-    async sendAudio(remoteJid, url, voiceNote = false) {
+    async sendAudio(remoteJid, url, voiceNote) {
 
         if (!remoteJid.includes("@") || !url.includes("http")) return
 
-        try { await this.client.sendMessage(remoteJid, { audio: { url: url }, ptt: voiceNote }) }
+        try { await this.client.sendMessage(remoteJid, { audio: { url: url }, ptt: voiceNote || false }) }
 
         catch { return }
     }

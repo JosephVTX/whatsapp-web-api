@@ -29,14 +29,14 @@ app.post("/api/text", async (req, res) => {
 
 app.post("/api/audio", async (req, res) => {
 
-    const { remoteJid, url } = req.body
+    const { remoteJid, url, voiceNote } = req.body
 
     if (remoteJid, url) {
 
 
         try {
 
-            await whatsapp.sendAudio(remoteJid, url)
+            await whatsapp.sendAudio(remoteJid, url, voiceNote)
 
             res.status(200).send("Audio sent")
 

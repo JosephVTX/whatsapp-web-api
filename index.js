@@ -5,6 +5,6 @@ const {app, whatsapp} = require('./src/api/server');
 
 app.listen(PORT, async() => {
 
-    console.log(`Server listening on port ${PORT}`)
     await whatsapp.init()
+    console.log(`Server listening on port ${PORT}`)
 })

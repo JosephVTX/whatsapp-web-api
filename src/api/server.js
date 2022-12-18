@@ -13,14 +13,17 @@ app.post("/api/text", async (req, res) => {
 
     const { remoteJid, message } = req.body
 
-    try {
+    if (remoteJid && message) {
 
-        await whatsapp.sendMessage(remoteJid, message)
-        res.status(200).send("Message sent")
+        whatsapp.sendMessage(remoteJid, message)
+            .then(r => res.status(200).send(r))
+            .catch(e => res.status(400).send(e))
+
     }
-    catch (err) {
 
-        res.status(500).send(err.message)
+    else {
+
+        res.status(400).send("Bad request")
     }
 
 
@@ -31,21 +34,12 @@ app.post("/api/audio", async (req, res) => {
 
     const { remoteJid, url, voiceNote } = req.body
 
-    if (remoteJid, url) {
+    if (remoteJid && url) {
 
 
-        try {
-
-            await whatsapp.sendAudio(remoteJid, url, voiceNote)
-
-            res.status(200).send("Audio sent")
-
-        }
-        catch (err) {
-
-            res.status(500).send(err.message)
-
-        }
+        whatsapp.sendAudio(remoteJid, url, voiceNote)
+            .then(r => res.status(200).send(r))
+            .catch(e => res.status(400).send(e))
     }
 
     else {
@@ -61,19 +55,9 @@ app.post("/api/image", async (req, res) => {
 
     if (remoteJid, url) {
 
-        try {
-
-            await whatsapp.sendImage(remoteJid, url)
-
-            res.status(200).send("Image sent")
-
-        }
-
-        catch (err) {
-
-            res.status(500).send(err.message)
-
-        }
+        whatsapp.sendImage(remoteJid, url)
+            .then(r => res.status(200).send(r))
+            .catch(e => res.status(400).send(e))
     }
 
     else {
@@ -90,19 +74,9 @@ app.post("/api/file", async (req, res) => {
 
     if (remoteJid && url) {
 
-        try {
-
-            await whatsapp.sendFile(remoteJid, url, fileName)
-
-            res.status(200).send("File sent")
-
-        }
-
-        catch (err) {
-
-            res.status(500).send(err.message)
-
-        }
+        whatsapp.sendFile(remoteJid, url, fileName)
+            .then(r => res.status(200).send(r))
+            .catch(e => res.status(400).send(e))
     }
 
     else {
@@ -111,6 +85,58 @@ app.post("/api/file", async (req, res) => {
     }
 })
 
+app.get("/api/profile/:remoteJid", async (req, res) => {
+
+    const { remoteJid } = req.params
+
+    if (remoteJid) {
+
+        whatsapp.getProfilePictureUrl(remoteJid)
+            .then(r => res.status(200).send(r))
+            .catch(e => res.status(400).send(e))
+    }
+
+    else {
+
+        res.status(400).send("Bad request")
+    }
+})
+
+app.post("/api/contact", async (req, res) => {
+
+    const { remoteJid, contactNumber, displayName } = req.body
+
+    if (remoteJid && contactNumber && displayName) {
+
+        whatsapp.sendContact(remoteJid, contactNumber, displayName)
+            .then(r => res.status(200).send(r))
+            .catch(e => res.status(400).send(e))
+    }
+
+    else {
+
+        res.status(400).send("Bad request")
+    }
+})
+
+
+app.post("/api/location", async (req, res) => {
+
+
+    const { remoteJid, latitude, longitude } = req.body
+
+    if (remoteJid && latitude && longitude) {
+
+        whatsapp.sendLocation(remoteJid, latitude, longitude)
+            .then(r => res.status(200).send(r))
+            .catch(e => res.status(400).send(e))
+    }
+   
+    else{
+            
+            res.status(400).send("Bad request")
+    }
+})
 
 
 module.exports = { app, whatsapp }

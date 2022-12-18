@@ -3,10 +3,23 @@ const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = requi
 
 class Baileys {
 
+    error_remoteJid = {
+        status: "error",
+        message: "Invalid remoteJid",
+        valid: {
+            privateChat: "xxxxxxxxxxx@c.us",
+            groupChat: "xxxxxxxxxxxxxxxxxx@g.us"
+        }
+    }
+
+    error_remoteJid_url = {
+
+    }
 
     constructor() {
 
         this.client;
+        
     }
 
     async init() {
@@ -16,8 +29,7 @@ class Baileys {
         this.client = await makeWASocket({
             printQRInTerminal: true,
             auth: state,
-            logger: pino({ level: 'error' }),
-            downloadHistory: false
+            logger: pino({ level: 'error' })
 
         })
 
@@ -34,6 +46,7 @@ class Baileys {
                 this.init()
             }
         })
+
     }
 
     /**
@@ -43,10 +56,11 @@ class Baileys {
      */
     async sendMessage(remoteJid, message) {
 
-        if (!remoteJid.includes("@")) return
+        if (!remoteJid.includes("@")) throw this.error_remoteJid
 
-        try { await this.client.sendMessage(remoteJid, { text: message }) }
-        catch { return }
+        await this.client.sendMessage(remoteJid, { text: message })
+
+        return { status: "success" }
     }
 
     /**
@@ -58,11 +72,16 @@ class Baileys {
     async sendImage(remoteJid, url) {
 
 
-        if (!remoteJid.includes("@") || !url.includes("http")) return
+        if (!remoteJid.includes("@")) throw this.error_remoteJid
 
-        try { await this.client.sendMessage(remoteJid, { image: { url: url } }) }
+        if(!url.includes("http")) throw "Invalid url"
 
-        catch { return }
+        await this.client.sendMessage(remoteJid, { image: { url: url } })
+
+        return { status: "success" }
+
+
+
     }
 
     /**
@@ -74,11 +93,12 @@ class Baileys {
 
     async sendAudio(remoteJid, url, voiceNote) {
 
-        if (!remoteJid.includes("@") || !url.includes("http")) return
+        if (!remoteJid.includes("@")) throw this.error_remoteJid
 
-        try { await this.client.sendMessage(remoteJid, { audio: { url: url }, ptt: voiceNote || false }) }
+        if(!url.includes("http")) throw "Invalid url"
 
-        catch { return }
+        await this.client.sendMessage(remoteJid, { audio: { url: url }, ptt: voiceNote || false })
+        return { status: "success" }
     }
 
     /**
@@ -88,17 +108,20 @@ class Baileys {
      */
     async sendFile(remoteJid, url, fileName) {
 
-        if (!remoteJid.includes("@") || !url.includes("http")) return
+        if (!remoteJid.includes("@")) throw this.error_remoteJid
 
-        try {
-            const fileName_ = fileName || url.split("/").pop()
-            await this.client.sendMessage(remoteJid, {
-                document: { url: url },
-                fileName: fileName_
+        if(!url.includes("http")) throw "Invalid url"
 
-            })
-        }
-        catch { return }
+
+        const fileName_ = fileName || url.split("/").pop()
+
+        await this.client.sendMessage(remoteJid, {
+            document: { url: url },
+            fileName: fileName_
+        })
+
+        return { status: "success" }
+
 
     }
 
@@ -113,7 +136,7 @@ class Baileys {
 
     async sendButtons(remoteJid, text, footer, buttons) {
 
-        if (!remoteJid.includes("@")) return
+        if (!remoteJid.includes("@")) throw this.error_remoteJid
 
         const buttonMessage = {
 
@@ -123,11 +146,69 @@ class Baileys {
             headerType: 1,
         }
 
-        try {
-            await this.client.sendMessage(remoteJid, buttonMessage)
-        }
+        await this.client.sendMessage(remoteJid, buttonMessage)
 
-        catch { return }
+        return { status: "success" }
+    }
+
+    /**
+     * @param {string} remoteJid 
+     * @example await getProfilePictureUrl("xxxxxxxxxxx@c.us" || "xxxxxxxxxxxxxxxxxx@g.us")
+     */
+
+    async getProfilePictureUrl(remoteJid) {
+
+        if (!remoteJid.includes("@")) throw this.error_remoteJid
+
+        const profile = await this.client.profilePictureUrl(remoteJid)
+
+        return {
+            status: "success",
+            profile: profile
+        }
+    }
+
+
+    async sendContact(remoteJid, contactNumber, displayName) {
+
+
+        if (!remoteJid.includes("@")) throw this.error_remoteJid
+
+        if(!contactNumber.includes("+")) throw "Invalid contact number (must include country code)"
+
+        const cleanContactNumber = contactNumber.replaceAll(" ", "")
+        const waid = cleanContactNumber.replace("+", "")
+
+        const vcard = 
+              'BEGIN:VCARD\n'
+            + 'VERSION:3.0\n'
+            + `FN:${displayName}\n`
+            + 'ORG:Ashoka Uni;\n'
+            + `TEL;type=CELL;type=VOICE;waid=${waid}:${cleanContactNumber}\n`
+            + 'END:VCARD'
+
+        await this.client.sendMessage(remoteJid, {
+            contacts: {
+
+                displayName: 'XD',
+                contacts: [{vcard}]
+            }
+        })
+
+        return { status: "success" }
+    }
+
+
+    async sendLocation(remoteJid, latitude, longitude) {
+
+
+        if (!remoteJid.includes("@")) throw this.error_remoteJid
+        
+        await this.client.sendMessage(remoteJid, {
+            location: { degreesLatitude: latitude, degreesLongitude: longitude }
+        })
+
+        return { status: "success" }
     }
 
 }

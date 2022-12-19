@@ -19,7 +19,7 @@ const text = async () => {
             if (!fromMe && messageBody) {
 
 
-                await whatsapp.sendContact(remoteJid, "+51927834271", "Trux", messages)
+                await whatsapp.sendSticker(remoteJid, "https://media2.giphy.com/media/8m4R4pvViWtRzbloJ1/giphy.gif")
                 
 
             }

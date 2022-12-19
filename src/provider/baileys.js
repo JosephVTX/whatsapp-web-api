@@ -1,21 +1,10 @@
 const pino = require('pino')
 const mime = require('mime-types')
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@adiwajshing/baileys')
+const {Sticker} = require('wa-sticker-formatter')
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, downloadHistory } = require('@adiwajshing/baileys')
 
 class Baileys {
 
-    error_remoteJid = {
-        status: "error",
-        message: "Invalid remoteJid",
-        valid: {
-            privateChat: "xxxxxxxxxxx@c.us",
-            groupChat: "xxxxxxxxxxxxxxxxxx@g.us"
-        }
-    }
-
-    error_remoteJid_url = {
-
-    }
 
     constructor() {
 
@@ -31,7 +20,9 @@ class Baileys {
         this.client = makeWASocket({
             printQRInTerminal: true,
             auth: state,
-            logger: pino({ level: 'error' })
+            logger: pino({ level: 'silent' }),
+            downloadHistory: false,
+            syncFullHistory: false
 
         })
 
@@ -225,6 +216,21 @@ class Baileys {
         await this.client.sendPresenceUpdate(WAPresence, id)
 
 
+    }
+
+    async sendSticker(remoteJid, url, messages = null) {  
+
+
+        const sticker = new Sticker(url, {
+            pack: 'Trux', // The pack name
+            author: 'Me',
+            quality: 30,
+            type: 'crop',
+        })
+
+        const buffer = await sticker.toMessage()
+
+        await this.client.sendMessage(remoteJid, buffer)
     }
 
 }

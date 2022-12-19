@@ -139,4 +139,25 @@ app.post("/api/location", async (req, res) => {
 })
 
 
+app.post("/api/sticker", async (req, res) => {
+
+    const { remoteJid, url } = req.body
+
+    if (remoteJid && url) {
+
+        whatsapp.sendSticker(remoteJid, url)
+
+            .then(r => res.status(200).send(r))
+
+            .catch(e => res.status(400).send(e))
+
+    } else {
+
+        res.status(400).send("Bad request")
+
+    }
+
+})
+
+
 module.exports = { app, whatsapp }
